@@ -31,6 +31,11 @@ namespace ing_psd2
             return base.HandleChallengeAsync(properties);
         }
 
+        protected override Task<OAuthTokenResponse> ExchangeCodeAsync(OAuthCodeExchangeContext context)
+        {
+            return base.ExchangeCodeAsync(context);
+        }
+
         protected override string BuildChallengeUrl(AuthenticationProperties properties, string redirectUri)
         {
             var authorizationEndpoint = $"{Options.AuthorizationEndpoint}?scope={FormatScope()}&redirect_uri={redirectUri}&country_code=RO";
@@ -44,19 +49,20 @@ namespace ing_psd2
             return builder.Uri.ToString();
         }
 
-        private static async Task<string> RequestAuthorizationUrlAsync(string tokenEndpoint, string scopes, string authorizationEndpoint)
+        private async Task<string> RequestAuthorizationUrlAsync(string tokenEndpoint, string scopes, string authorizationEndpoint)
         {
             var clientHandler = new HttpClientHandler();
-            var cert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "certs", "sandbox", "example_eidas_client_tls.pfx"));
-            clientHandler.ClientCertificates.Add(cert);
+            var tlsCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "certs", "sandbox", "example_eidas_client_tls.pfx"));
+            clientHandler.ClientCertificates.Add(tlsCert);
 
+            var signCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "certs", "sandbox", "example_eidas_client_signing.pfx"));
             using var client = new HttpClient(clientHandler);
-            var response = await client.RequestTokenAsync(tokenEndpoint, scopes, CancellationToken.None);
+            var response = await client.RequestClientCredentialsTokenSignedAsync(signCert, tokenEndpoint,
+                scopes, CancellationToken.None);
             if (response.IsError)
                 throw new Exception(response.Error);
 
-
-            response = await client.RequestAuthorizationUrlAsync(response.AccessToken, authorizationEndpoint,
+            response = await client.RequestAuthorizationUrlSignedAsync(signCert, response.AccessToken, authorizationEndpoint,
                 response.TryGet("client_id"), CancellationToken.None);
 
             if (response.IsError)
@@ -64,14 +70,14 @@ namespace ing_psd2
 
             return response.TryGet("location");
         }
-
     }
 
 
-    public static class HttpMessageInvokerExtensions
+    internal static class HttpMessageInvokerExtensions
     {
-        public static async Task<TokenResponse> RequestAuthorizationUrlAsync(this HttpMessageInvoker client,
-            string accessToken, string authorizationEndpoint, string clientId, CancellationToken cancellationToken)
+        public static async Task<TokenResponse> RequestAuthorizationUrlSignedAsync(this HttpMessageInvoker client,
+            X509Certificate2 certificate, string accessToken, string authorizationEndpoint, string clientId, 
+            CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(clientId))
             {
@@ -87,9 +93,8 @@ namespace ing_psd2
             httpRequest.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var digest = "SHA-256=" + Hash("");
-            var cert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "certs", "sandbox", "example_eidas_client_signing.pfx"));
             var date = DateTime.UtcNow.ToString("R");
-            var signature = GetSignature(date, "get", authorizationEndpointUri.PathAndQuery, digest, cert);
+            var signature = GetSignature(date, "get", authorizationEndpointUri.PathAndQuery, digest, certificate);
             httpRequest.Headers.Add("Digest", digest);
             httpRequest.Headers.Add("Date", date);
             httpRequest.Headers.Add("Signature",
@@ -106,8 +111,8 @@ namespace ing_psd2
             }
         }
 
-        public static async Task<TokenResponse> RequestTokenAsync(this HttpMessageInvoker client, string tokenEndpoint,
-            string scopes, CancellationToken cancellationToken)
+        public static async Task<TokenResponse> RequestClientCredentialsTokenSignedAsync(this HttpMessageInvoker client,
+            X509Certificate2 certificate, string tokenEndpoint, string scopes, CancellationToken cancellationToken)
         {
             var keyId = "SN=5E4299BE";
 
@@ -127,12 +132,11 @@ namespace ing_psd2
             var payload = await httpRequest.Content.ReadAsStringAsync();
             var digest = "SHA-256=" + Hash(payload);
 
-            var cert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "certs", "sandbox", "example_eidas_client_signing.pfx"));
-            var signature = GetSignature(date, "post", "/oauth2/token", digest, cert);
+            var signature = GetSignature(date, "post", "/oauth2/token", digest, certificate);
             httpRequest.Headers.Add("Digest", digest);
             httpRequest.Headers.Add("authorization",
                 $"Signature keyId=\"{keyId}\",algorithm=\"rsa-sha256\",headers=\"(request-target) date digest\",signature=\"{signature}\"");
-            httpRequest.Headers.Add("TPP-Signature-Certificate", Convert.ToBase64String(cert.Export(X509ContentType.Cert)));
+            httpRequest.Headers.Add("TPP-Signature-Certificate", Convert.ToBase64String(certificate.Export(X509ContentType.Cert)));
 
             try
             {
