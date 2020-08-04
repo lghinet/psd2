@@ -1,4 +1,5 @@
-﻿using IdentityModel.Client;
+﻿using System.Collections.Generic;
+using IdentityModel.Client;
 using ing_psd2.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace ing_psd2.Controllers
 {
@@ -28,11 +30,12 @@ namespace ing_psd2.Controllers
         public async Task<IActionResult> Ing()
         {
             var ac = await HttpContext.GetTokenAsync("access_token");
-            using var client = new HttpClient(new DigestHttpHandler());
+            using var client = new HttpClient(new DigestHttpHandler(Utils.GetSigningCertificate()));
             client.DefaultRequestHeaders.Add("keyId", "5ca1ab1e-c0ca-c01a-cafe-154deadbea75");
             client.SetBearerToken(ac);
             var result = await client.GetStringAsync("https://api.sandbox.ing.com/v3/accounts");
-            return View((object)result);
+            var accounts = JsonConvert.DeserializeObject<IngModel>(result);
+            return View(accounts);
         }
 
         [Authorize(AuthenticationSchemes = "BT")]
@@ -45,7 +48,7 @@ namespace ing_psd2.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
     }
 }

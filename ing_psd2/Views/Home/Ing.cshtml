@@ -2,13 +2,48 @@
     ViewData["Title"] = "Privacy Policy";
 }
 <h2>Accounts</h2>
-@model string
+@model IngModel
 
-<pre id="te">
-    
-    <script>
+
+<table>
+    <thead>
+        <tr>
+            <td>
+                @Html.DisplayNameFor(model => model.accounts[0].name)
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.accounts[0].product)
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.accounts[0].iban)
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.accounts[0].currency)
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var account in Model.accounts)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => account.name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => account.product)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => account.iban)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => account.currency)
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+@*<script>
         window.onload = function () {
             this.document.getElementById("te").innerHTML = JSON.stringify(JSON.parse('@Html.Raw(Model)'), null, 2);
         };
-    </script>
-</pre>
+    </script>*@

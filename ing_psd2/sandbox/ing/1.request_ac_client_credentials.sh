@@ -9,7 +9,7 @@
 
 ## THE SCRIPT USES THE DOWNLOADED EXAMPLE EIDAS CERTIFICATES
 keyId="SN=5E4299BE" # Serial number of the downlaoded certificate in hexadecimal code
-certPath="/d/GitHub/psd2/ing_psd2/certs/sandbox/" # path of the downloaded certificates and keys
+certPath="/d/GitHub/psd2/ing_psd2/sandbox/ing/" # path of the downloaded certificates and keys
 httpHost="https://api.sandbox.ing.com"
 
 # httpMethod value must be in lower case

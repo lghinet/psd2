@@ -17,16 +17,17 @@ namespace ing_psd2
     public class IngHttpHandler : DelegatingHandler
     {
         private readonly string _tokenEndpoint;
+        private readonly X509Certificate2 _signingCertificate = Utils.GetSigningCertificate();
 
-        public IngHttpHandler(string tokenEndpoint) : base(new DigestHttpHandler())
+        public IngHttpHandler(string tokenEndpoint) : base(new DigestHttpHandler(Utils.GetSigningCertificate()))
         {
             _tokenEndpoint = tokenEndpoint;
         }
 
-
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var response = await RequestClientCredentialsTokenAsync(Utils.GetSecuredHandler(), Utils.GetSigningCertificate(), _tokenEndpoint, cancellationToken);
+            var response = await RequestClientCredentialsTokenAsync(Utils.GetSecuredHandler(), _signingCertificate,
+                _tokenEndpoint, cancellationToken);
             if (response.IsError)
                 throw new Exception(response.Error);
 
@@ -56,7 +57,7 @@ namespace ing_psd2
             var payload = await httpRequest.Content.ReadAsStringAsync();
             var digest = "SHA-256=" + Utils.Hash(payload);
 
-            var signature =Utils.GetSignature(date, "post", tokenEndpointUri.PathAndQuery, digest, certificate);
+            var signature = Utils.GetSignature(date, "post", tokenEndpointUri.PathAndQuery, digest, certificate);
             httpRequest.Headers.Add("Digest", digest);
             httpRequest.Headers.Add("authorization",
                 $"Signature keyId=\"{keyId}\",algorithm=\"rsa-sha256\",headers=\"(request-target) date digest\",signature=\"{signature}\"");
@@ -73,15 +74,16 @@ namespace ing_psd2
                 return ProtocolResponse.FromException<TokenResponse>(ex);
             }
         }
+
     }
 
     public class DigestHttpHandler : DelegatingHandler
     {
-        private X509Certificate2 _signingCertificate;
-        protected X509Certificate2 SigningCertificate => _signingCertificate ??= Utils.GetSigningCertificate();
+        private readonly X509Certificate2 _signingCertificate;
 
-        public DigestHttpHandler() : base(Utils.GetSecuredHandler())
+        public DigestHttpHandler(X509Certificate2 signingCertificate) : base(Utils.GetSecuredHandler())
         {
+            _signingCertificate = signingCertificate;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -100,7 +102,8 @@ namespace ing_psd2
 
             var digest = "SHA-256=" + Utils.Hash(payload);
             var date = DateTime.UtcNow.ToString("R");
-            var signature = Utils.GetSignature(date, request.Method.ToString().ToLower(), request.RequestUri.PathAndQuery, digest, SigningCertificate);
+            var signature = Utils.GetSignature(date, request.Method.ToString().ToLower(),
+                request.RequestUri.PathAndQuery, digest, _signingCertificate);
             request.Headers.Add("Digest", digest);
             request.Headers.Add("Date", date);
             request.Headers.Add("Signature",
@@ -114,7 +117,7 @@ namespace ing_psd2
     {
         public static X509Certificate2 GetSigningCertificate()
         {
-            return new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "certs", "sandbox", "example_eidas_client_signing.pfx"));
+            return new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "sandbox", "ing", "example_eidas_client_signing.pfx"));
         }
 
         public static string GetSignature(string date, string method, string url, string digest, X509Certificate2 cert)
@@ -142,7 +145,7 @@ namespace ing_psd2
         public static HttpMessageHandler GetSecuredHandler()
         {
             var clientHandler = new HttpClientHandler();
-            var tlsCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "certs", "sandbox", "example_eidas_client_tls.pfx"));
+            var tlsCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "sandbox", "ing", "example_eidas_client_tls.pfx"));
             clientHandler.ClientCertificates.Add(tlsCert);
 
             return clientHandler;

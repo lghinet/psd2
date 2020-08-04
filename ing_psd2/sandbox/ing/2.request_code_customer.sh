@@ -12,7 +12,7 @@
 
 
 keyId="5ca1ab1e-c0ca-c01a-cafe-154deadbea75" # client_id as provided in the documentation
-certPath="/d/GitHub/psd2/ing_psd2/certs/sandbox/" # path of the downloaded certificates and keys
+certPath="/d/GitHub/psd2/ing_psd2/sandbox/ing/" # path of the downloaded certificates and keys
 httpHost="https://api.sandbox.ing.com"
 
 # httpMethod must be in lower code

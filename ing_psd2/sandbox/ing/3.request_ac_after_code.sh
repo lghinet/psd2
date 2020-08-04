@@ -10,7 +10,7 @@
 ###################################################################################
 
 keyId="5ca1ab1e-c0ca-c01a-cafe-154deadbea75" # client_id as provided in the documentation
-certPath="/certs/"  # path of the downloaded certificates and keys
+certPath="/d/GitHub/psd2/ing_psd2/sandbox/ing/" # path of the downloaded certificates and keys
 authorization_code="8b6cd77a-aa44-4527-ab08-a58d70cca286" # generated value of authorization code from the previous step.
 
 # Generated value of application access token. Please note that the access token expires in 15 minutes

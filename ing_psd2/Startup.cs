@@ -38,12 +38,12 @@ namespace ing_psd2
                     options.Scope.Add("payment-accounts:transactions:view");
                     options.BackchannelHttpHandler = new IngHttpHandler(options.TokenEndpoint);
                     options.SaveTokens = true;
-                    options.Events.OnCreatingTicket = ctx =>
-                    {
-                        var tokens = ctx.Properties.GetTokens().ToList();
-                        ctx.Properties.StoreTokens(tokens);
-                        return Task.CompletedTask;
-                    };
+                    //options.Events.OnCreatingTicket = ctx =>
+                    //{
+                    //    var tokens = ctx.Properties.GetTokens().ToList();
+                    //    ctx.Properties.StoreTokens(tokens);
+                    //    return Task.CompletedTask;
+                    //};
                 });
 
             services.AddAuthorization();
