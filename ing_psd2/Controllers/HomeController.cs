@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using IdentityModel.Client;
+using ing_psd2.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ing_psd2.Models;
-using Microsoft.AspNetCore.Authorization;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ing_psd2.Controllers
 {
@@ -25,10 +25,22 @@ namespace ing_psd2.Controllers
         }
 
         [Authorize(AuthenticationSchemes = "ING")]
-        public IActionResult Privacy()
+        public async Task<IActionResult> Ing()
+        {
+            var ac = await HttpContext.GetTokenAsync("access_token");
+            using var client = new HttpClient(new DigestHttpHandler());
+            client.DefaultRequestHeaders.Add("keyId", "5ca1ab1e-c0ca-c01a-cafe-154deadbea75");
+            client.SetBearerToken(ac);
+            var result = await client.GetStringAsync("https://api.sandbox.ing.com/v3/accounts");
+            return View((object)result);
+        }
+
+        [Authorize(AuthenticationSchemes = "BT")]
+        public IActionResult Bt()
         {
             return View();
         }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

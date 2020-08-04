@@ -1,17 +1,15 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 
 namespace ing_psd2
 {
@@ -27,21 +25,25 @@ namespace ing_psd2
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(options =>
-                {
-                   options.DefaultScheme = "psd2";
-                   // options.DefaultChallengeScheme = "ING";
-                })
-                .AddCookie("psd2")
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie()
                 .AddOAuth<OAuthOptions, IngOAuthHandler>("ING", options =>
                 {
                     options.AuthorizationEndpoint = "https://api.sandbox.ing.com/oauth2/authorization-server-url";
                     options.TokenEndpoint = "https://api.sandbox.ing.com/oauth2/token";
                     options.CallbackPath = "/signin-ing";
-                    options.ClientId = "e77d776b-90af-4684-bebc-521e5b2614dd"; //"5f6d1bc8-a2f1-47e4-b01a-e04d121672f2";
+                    options.ClientId = "5ca1ab1e-c0ca-c01a-cafe-154deadbea75";
                     options.ClientSecret = "fake";
                     options.Scope.Add("payment-accounts:balances:view");
                     options.Scope.Add("payment-accounts:transactions:view");
+                    options.BackchannelHttpHandler = new IngHttpHandler(options.TokenEndpoint);
+                    options.SaveTokens = true;
+                    options.Events.OnCreatingTicket = ctx =>
+                    {
+                        var tokens = ctx.Properties.GetTokens().ToList();
+                        ctx.Properties.StoreTokens(tokens);
+                        return Task.CompletedTask;
+                    };
                 });
 
             services.AddAuthorization();

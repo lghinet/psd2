@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Privacy Policy";
+}
+<h2>Accounts</h2>
+@model string
+
+<pre id="te">
+    
+    <script>
+        window.onload = function () {
+            this.document.getElementById("te").innerHTML = JSON.stringify(JSON.parse('@Html.Raw(Model)'), null, 2);
+        };
+    </script>
+</pre>
