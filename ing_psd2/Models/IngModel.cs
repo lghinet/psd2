@@ -20,6 +20,12 @@ namespace ing_psd2.Models
 
     public class AccountLink
     {
+        public AccountLink()
+        {
+            balances = new Link();
+            transactions = new Link();
+        }
+
         public Link balances { set; get; }
         public Link transactions { set; get; }
     }

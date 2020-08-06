@@ -39,11 +39,15 @@ namespace ing_psd2.Controllers
         }
 
         [Authorize(AuthenticationSchemes = "BT")]
-        public IActionResult Bt()
+        public async Task<IActionResult> Bt()
         {
-            return View();
+            var ac = await HttpContext.GetTokenAsync("access_token");
+            using var client = new HttpClient(new BtHttpHandler());
+            client.SetBearerToken(ac);
+            var result = await client.GetStringAsync("https://api.apistorebt.ro/bt/sb/bt-psd2-aisp/v1/accounts");
+            var accounts = JsonConvert.DeserializeObject<IngModel>(result);
+            return View(accounts);
         }
-
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

@@ -1,6 +1,61 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
+<h2>Accounts</h2>
+@model IngModel
 
-<p>Use this page to detail your site's privacy policy.</p>
+
+<table style="width:100%">
+    <thead>
+        <tr>
+            <td>
+                @Html.DisplayNameFor(model => model.accounts[0].name)
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.accounts[0].product)
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.accounts[0].iban)
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.accounts[0].currency)
+            </td>
+            <td>
+                balances link
+            </td>
+            <td>
+                transactions link
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var account in Model.accounts)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => account.name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => account.product)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => account.iban)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => account.currency)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => account._links.balances.href)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => account._links.transactions.href)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@*<script>
+        window.onload = function () {
+            this.document.getElementById("te").innerHTML = JSON.stringify(JSON.parse('@Html.Raw(Model)'), null, 2);
+        };
+    </script>*@
