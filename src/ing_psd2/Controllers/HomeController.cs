@@ -29,7 +29,7 @@ namespace ing_psd2.Controllers
         [Authorize(AuthenticationSchemes = "ING")]
         public async Task<IActionResult> Ing()
         {
-            var ac = await HttpContext.GetTokenAsync("access_token");
+            var ac = await HttpContext.GetUserAccessTokenAsync();
             using var client = new HttpClient(new DigestHttpHandler(Utils.GetSigningCertificate()));
             client.DefaultRequestHeaders.Add("keyId", "5ca1ab1e-c0ca-c01a-cafe-154deadbea75");
             client.SetBearerToken(ac);
@@ -41,7 +41,7 @@ namespace ing_psd2.Controllers
         [Authorize(AuthenticationSchemes = "BT")]
         public async Task<IActionResult> Bt()
         {
-            var ac = await HttpContext.GetTokenAsync("access_token");
+            var ac = await HttpContext.GetUserAccessTokenAsync();
             using var client = new HttpClient(new BtHttpHandler());
             client.SetBearerToken(ac);
             var result = await client.GetStringAsync("https://api.apistorebt.ro/bt/sb/bt-psd2-aisp/v1/accounts");
