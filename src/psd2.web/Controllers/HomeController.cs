@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
-using IdentityModel.Client;
-using ing_psd2.Models;
+﻿using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using psd2.web.Models;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace psd2.web.Controllers
 {
@@ -26,11 +25,11 @@ namespace psd2.web.Controllers
             return View();
         }
 
-        [Authorize(AuthenticationSchemes = "ING")]
+        [Authorize]
         public async Task<IActionResult> Ing()
         {
             var ac = await HttpContext.GetUserAccessTokenAsync();
-            using var client = new HttpClient(new DigestHttpHandler(Utils.GetSigningCertificate()));
+            using var client = new HttpClient(new DigestHttpHandler(Utils.CreateCertificateFromFile()));
             client.DefaultRequestHeaders.Add("keyId", "5ca1ab1e-c0ca-c01a-cafe-154deadbea75");
             client.SetBearerToken(ac);
             var result = await client.GetStringAsync("https://api.sandbox.ing.com/v3/accounts");
@@ -38,7 +37,7 @@ namespace psd2.web.Controllers
             return View(accounts);
         }
 
-        [Authorize(AuthenticationSchemes = "BT")]
+        [Authorize]
         public async Task<IActionResult> Bt()
         {
             var ac = await HttpContext.GetUserAccessTokenAsync();

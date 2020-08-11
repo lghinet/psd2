@@ -1,6 +1,4 @@
-﻿using IdentityModel;
-using IdentityModel.Client;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,16 +9,17 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using IdentityModel;
+using IdentityModel.Client;
 
-namespace psd2.web
+namespace ing
 {
     public class IngHttpHandler : DelegatingHandler
     {
         private readonly string _tokenEndpoint;
-        private readonly X509Certificate2 _signingCertificate = Utils.CreateCertificateFromFile();
+        private readonly X509Certificate2 _signingCertificate = Utils.GetSigningCertificate();
 
-        public IngHttpHandler(string tokenEndpoint) 
-            : base(new DigestHttpHandler(Utils.CreateCertificateFromFile()))
+        public IngHttpHandler(string tokenEndpoint) : base(new DigestHttpHandler(Utils.GetSigningCertificate()))
         {
             _tokenEndpoint = tokenEndpoint;
         }
@@ -116,9 +115,9 @@ namespace psd2.web
 
     static class Utils
     {
-        public static X509Certificate2 CreateCertificateFromFile()
+        public static X509Certificate2 GetSigningCertificate()
         {
-            return new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "bin\\Debug\\netcoreapp3.1\\sandbox", "example_eidas_client_signing.pfx"));
+            return new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "sandbox", "example_eidas_client_signing.pfx"));
         }
 
         public static string GetSignature(string date, string method, string url, string digest, X509Certificate2 cert)
@@ -146,7 +145,7 @@ namespace psd2.web
         public static HttpMessageHandler GetSecuredHandler()
         {
             var clientHandler = new HttpClientHandler();
-            var tlsCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "bin\\Debug\\netcoreapp3.1\\sandbox", "example_eidas_client_tls.pfx"));
+            var tlsCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "sandbox", "example_eidas_client_tls.pfx"));
             clientHandler.ClientCertificates.Add(tlsCert);
 
             return clientHandler;

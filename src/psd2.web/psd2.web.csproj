@@ -7,7 +7,6 @@
 
 
   <ItemGroup>
-    <PackageReference Include="IdentityModel" Version="4.3.1" />
     <!--<PackageReference Include="IdentityModel.AspNetCore" Version="2.0.0" />-->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.6" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.6" />
@@ -20,7 +19,9 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\bt\bt.csproj" />
     <ProjectReference Include="..\IdentityModel.AspNetCore\IdentityModel.AspNetCore.csproj" />
+    <ProjectReference Include="..\ing\ing.csproj" />
   </ItemGroup>
 
 
