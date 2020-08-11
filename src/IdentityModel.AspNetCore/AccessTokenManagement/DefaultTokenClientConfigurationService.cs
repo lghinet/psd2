@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -15,7 +16,7 @@ namespace IdentityModel.AspNetCore.AccessTokenManagement
     public class DefaultTokenClientConfigurationService : ITokenClientConfigurationService
     {
         private readonly AccessTokenManagementOptions _accessTokenManagementOptions;
-        private readonly IOptionsMonitor<OpenIdConnectOptions> _oidcOptions;
+        private readonly IOptionsMonitor<OAuthOptions> _oidcOptions;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
 
         /// <summary>
@@ -26,7 +27,7 @@ namespace IdentityModel.AspNetCore.AccessTokenManagement
         /// <param name="schemeProvider"></param>
         public DefaultTokenClientConfigurationService(
             IOptions<AccessTokenManagementOptions> accessTokenManagementOptions,
-            IOptionsMonitor<OpenIdConnectOptions> oidcOptions,
+            IOptionsMonitor<OAuthOptions> oidcOptions,
             IAuthenticationSchemeProvider schemeProvider)
         {
             _accessTokenManagementOptions = accessTokenManagementOptions.Value;
@@ -50,12 +51,11 @@ namespace IdentityModel.AspNetCore.AccessTokenManagement
                 // otherwise fall back to the scheme configuration
                 else
                 {
-                    var (options, configuration) = await GetOpenIdConnectSettingsAsync(_accessTokenManagementOptions.User.Scheme);
+                    var options = await GetOptions(_accessTokenManagementOptions.User.Scheme);
 
                     requestDetails = new ClientCredentialsTokenRequest()
                     {
-                        Address = configuration.TokenEndpoint,
-
+                        Address = options.TokenEndpoint,
                         ClientId = options.ClientId,
                         ClientSecret = options.ClientSecret
                     };
@@ -86,12 +86,11 @@ namespace IdentityModel.AspNetCore.AccessTokenManagement
         /// <inheritdoc />
         public virtual async Task<RefreshTokenRequest> GetRefreshTokenRequestAsync()
         {
-            var (options, configuration) = await GetOpenIdConnectSettingsAsync(_accessTokenManagementOptions.User.Scheme);
+            var options = await GetOptions(_accessTokenManagementOptions.User.Scheme);
 
             var requestDetails = new RefreshTokenRequest
             {
-                Address = configuration.TokenEndpoint,
-
+                Address = options.TokenEndpoint,
                 ClientId = options.ClientId,
                 ClientSecret = options.ClientSecret
             };
@@ -106,36 +105,20 @@ namespace IdentityModel.AspNetCore.AccessTokenManagement
         }
 
         /// <inheritdoc />
-        public virtual async Task<TokenRevocationRequest> GetTokenRevocationRequestAsync()
+        public virtual Task<TokenRevocationRequest> GetTokenRevocationRequestAsync()
         {
-            var (options, configuration) = await GetOpenIdConnectSettingsAsync(_accessTokenManagementOptions.User.Scheme);
-            
-            var requestDetails = new TokenRevocationRequest
-            {
-                Address = configuration.AdditionalData[OidcConstants.Discovery.RevocationEndpoint].ToString(),
-
-                ClientId = options.ClientId,
-                ClientSecret = options.ClientSecret
-            };
-            
-            var assertion = await CreateAssertionAsync();
-            if (assertion != null)
-            {
-                requestDetails.ClientAssertion = assertion;
-            }
-
-            return requestDetails;
+            throw new NotImplementedException();
         }
-        
+
         /// <summary>
         /// Retrieves configuration from a named OpenID Connect handler
         /// </summary>
         /// <param name="schemeName"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public virtual async Task<(OpenIdConnectOptions options, OpenIdConnectConfiguration configuration)> GetOpenIdConnectSettingsAsync(string schemeName)
+        public virtual async Task<OAuthOptions> GetOptions(string schemeName)
         {
-            OpenIdConnectOptions options;
+            OAuthOptions options;
 
             if (string.IsNullOrWhiteSpace(schemeName))
             {
@@ -153,17 +136,7 @@ namespace IdentityModel.AspNetCore.AccessTokenManagement
                 options = _oidcOptions.Get(schemeName);
             }
 
-            OpenIdConnectConfiguration configuration;
-            try
-            {
-                configuration = await options.ConfigurationManager.GetConfigurationAsync(default);
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException($"Unable to load OpenID configuration for configured scheme: {e.Message}");
-            }
-
-            return (options, configuration);
+            return options;
         }
 
         /// <summary>

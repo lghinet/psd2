@@ -1,4 +1,3 @@
-using IdentityModel.AspNetCore.AccessTokenManagement;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
@@ -58,7 +57,7 @@ namespace ing_psd2
             services.AddAuthorization();
             services.AddControllersWithViews();
 
-            services.AddAccessTokenManagement();
+            services.AddAccessTokenManagement(options=>options.User.Scheme="BT");
 
         }
 
