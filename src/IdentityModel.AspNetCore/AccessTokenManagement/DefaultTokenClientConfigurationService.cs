@@ -1,12 +1,10 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IdentityModel.AspNetCore.AccessTokenManagement
 {

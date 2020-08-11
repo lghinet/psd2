@@ -1,6 +1,6 @@
 using System;
 
-namespace ing_psd2.Models
+namespace psd2.web.Models
 {
     public class ErrorViewModel
     {

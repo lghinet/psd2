@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ing_psd2
+namespace psd2.web
 {
     public class BtHttpHandler : DelegatingHandler
     {

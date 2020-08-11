@@ -10,7 +10,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace ing_psd2.Controllers
+namespace psd2.web.Controllers
 {
     public class HomeController : Controller
     {

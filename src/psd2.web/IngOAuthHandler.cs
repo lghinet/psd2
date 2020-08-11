@@ -15,7 +15,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ing_psd2
+namespace psd2.web
 {
     public class IngOAuthHandler : OAuthHandler<OAuthOptions>
     {
