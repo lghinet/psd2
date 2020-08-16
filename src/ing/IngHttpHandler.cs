@@ -17,11 +17,12 @@ namespace ing
     public class IngHttpHandler : DelegatingHandler
     {
         private readonly string _tokenEndpoint;
-        private readonly X509Certificate2 _signingCertificate = Utils.GetSigningCertificate();
+        private readonly X509Certificate2 _signingCertificate;
 
-        public IngHttpHandler(string tokenEndpoint) : base(new DigestHttpHandler(Utils.GetSigningCertificate()))
+        public IngHttpHandler(string tokenEndpoint) : base(new DigestHttpHandler())
         {
             _tokenEndpoint = tokenEndpoint;
+            _signingCertificate = Utils.GetSigningCertificate();
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -81,9 +82,9 @@ namespace ing
     {
         private readonly X509Certificate2 _signingCertificate;
 
-        public DigestHttpHandler(X509Certificate2 signingCertificate) : base(Utils.GetSecuredHandler())
+        public DigestHttpHandler() : base(Utils.GetSecuredHandler())
         {
-            _signingCertificate = signingCertificate;
+            _signingCertificate = Utils.GetSigningCertificate();
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -117,7 +118,7 @@ namespace ing
     {
         public static X509Certificate2 GetSigningCertificate()
         {
-            return new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "sandbox", "example_eidas_client_signing.pfx"));
+            return new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "bin\\Debug\\netcoreapp3.1\\sandbox", "example_eidas_client_signing.pfx"));
         }
 
         public static string GetSignature(string date, string method, string url, string digest, X509Certificate2 cert)
@@ -145,7 +146,7 @@ namespace ing
         public static HttpMessageHandler GetSecuredHandler()
         {
             var clientHandler = new HttpClientHandler();
-            var tlsCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "sandbox", "example_eidas_client_tls.pfx"));
+            var tlsCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "bin\\Debug\\netcoreapp3.1\\sandbox", "example_eidas_client_tls.pfx"));
             clientHandler.ClientCertificates.Add(tlsCert);
 
             return clientHandler;

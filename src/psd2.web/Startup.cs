@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+using bt;
+using ing;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -25,25 +26,22 @@ namespace psd2.web
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                    Configuration.GetConnectionString("sso")));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddAuthentication()
-                .AddOAuth("BT", options =>
+                //.AddGoogle()
+                .AddOAuth<BtOptions, OAuthHandler<BtOptions>>("BT", "BT", options =>
                 {
-                    options.AuthorizationEndpoint = "https://apistorebt.ro/mga/sps/oauth/oauth20/authorize";
-                    options.TokenEndpoint = "https://api.apistorebt.ro/bt/sb/oauth/token";
                     options.ClientId = "lgUimCyyCPbM0K6fg5jA";
                     options.ClientSecret = "zf0KLhRJlbJ52GdihZPY";
-                    options.SaveTokens = true;
                     options.UsePkce = true;
-                    options.CallbackPath = "/signin-bt";
                     options.Scope.Add("AIS:273c540e6c534b1f8d873baf23728969");
                     //options.Scope.Add("PIISP:consentId");
                     //options.Scope.Add("PIS:paymentId");
                 })
-                .AddOAuth<OAuthOptions, IngOAuthHandler>("ING", options =>
+                .AddOAuth<OAuthOptions, IngOAuthHandler>("ING", "ING", options =>
                 {
                     options.AuthorizationEndpoint = "https://api.sandbox.ing.com/oauth2/authorization-server-url";
                     options.TokenEndpoint = "https://api.sandbox.ing.com/oauth2/token";
@@ -65,7 +63,7 @@ namespace psd2.web
             services.AddAuthorization();
             services.AddControllersWithViews();
 
-            services.AddAccessTokenManagement(options=>options.User.Scheme="BT");
+            //services.AddAccessTokenManagement(options => options.User.Scheme = "BT");
 
         }
 
