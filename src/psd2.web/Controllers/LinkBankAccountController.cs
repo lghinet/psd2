@@ -1,18 +1,11 @@
-﻿using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using psd2.web.Models;
-using System.Diagnostics;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using bt;
-using ing;
-using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace psd2.web.Controllers
 {
