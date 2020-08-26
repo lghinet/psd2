@@ -18,13 +18,13 @@ jobs:
     - name: Set up .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '3.1.102'
+        dotnet-version: '3.1.401'
 
     - name: Build with dotnet
-      run: dotnet build --configuration Release
+      run: dotnet build src/psd2.web/psd2.web.csproj --configuration Release
 
     - name: dotnet publish
-      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+      run: dotnet publish src/psd2.web/psd2.web.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
