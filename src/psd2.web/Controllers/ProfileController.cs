@@ -42,13 +42,15 @@ namespace psd2.web.Controllers
         [HttpGet]
         public async Task<IActionResult> Ing()
         {
-            var ac = await HttpContext.GetUserAccessTokenAsync();
-            using var client = new HttpClient(new DigestHttpHandler());
-            client.DefaultRequestHeaders.Add("keyId", "5ca1ab1e-c0ca-c01a-cafe-154deadbea75");
-            client.SetBearerToken(ac);
-            var result = await client.GetStringAsync("https://api.sandbox.ing.com/v3/accounts");
-            var accounts = JsonConvert.DeserializeObject<IngModel>(result);
-            return View(accounts);
+            //var ac = await HttpContext.GetUserAccessTokenAsync();
+            //using var client = new HttpClient(new DigestHttpHandler());
+            //client.DefaultRequestHeaders.Add("keyId", "5ca1ab1e-c0ca-c01a-cafe-154deadbea75");
+            //client.SetBearerToken(ac);
+            //var result = await client.GetStringAsync("https://api.sandbox.ing.com/v3/accounts");
+            //var accounts = JsonConvert.DeserializeObject<IngModel>(result);
+            //return View(accounts);
+
+            return null;
         }
 
         [HttpPost]

@@ -43,14 +43,16 @@ namespace psd2.web
                 })
                 .AddOAuth<OAuthOptions, IngOAuthHandler>("ING", "ING", options =>
                 {
-                    options.AuthorizationEndpoint = "https://api.sandbox.ing.com/oauth2/authorization-server-url";
-                    options.TokenEndpoint = "https://api.sandbox.ing.com/oauth2/token";
+                    options.AuthorizationEndpoint = Configuration.GetValue<string>("Ing:AuthorizationEndpoint");
+                    options.TokenEndpoint = Configuration.GetValue<string>("Ing:TokenEndpoint");
                     options.CallbackPath = "/signin-ing";
-                    options.ClientId = "5ca1ab1e-c0ca-c01a-cafe-154deadbea75";
+                    options.ClientId = Configuration.GetValue<string>("Ing:ClientId");
                     options.ClientSecret = "fake";
                     options.Scope.Add("payment-accounts:balances:view");
                     options.Scope.Add("payment-accounts:transactions:view");
-                    options.BackchannelHttpHandler = new IngHttpHandler(options.TokenEndpoint);
+                    options.BackchannelHttpHandler = new IngHttpHandler(options.TokenEndpoint,
+                        Configuration.GetValue<string>("Ing:SingingCertificate"),
+                        Configuration.GetValue<string>("Ing:ClientCertificate"));
                     options.SaveTokens = true;
                     //options.Events.OnCreatingTicket = ctx =>
                     //{
