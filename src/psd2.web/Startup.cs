@@ -25,8 +25,7 @@ namespace psd2.web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetValue<string>("ConnectionStrings:sso")));
+                options.UseSqlServer(Configuration.GetConnectionString("sso")));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
@@ -34,8 +33,8 @@ namespace psd2.web
                 //.AddGoogle()
                 .AddOAuth<BtOptions, OAuthHandler<BtOptions>>("BT", "BT", options =>
                 {
-                    options.ClientId = "lgUimCyyCPbM0K6fg5jA";
-                    options.ClientSecret = "zf0KLhRJlbJ52GdihZPY";
+                    options.ClientId = Configuration.GetValue<string>("BankProviders:Bt:ClientId");
+                    options.ClientSecret = Configuration.GetValue<string>("BankProviders:Bt:ClientSecret");
                     options.UsePkce = true;
                     options.Scope.Add("AIS:273c540e6c534b1f8d873baf23728969");
                     //options.Scope.Add("PIISP:consentId");
@@ -43,16 +42,16 @@ namespace psd2.web
                 })
                 .AddOAuth<OAuthOptions, IngOAuthHandler>("ING", "ING", options =>
                 {
-                    options.AuthorizationEndpoint = Configuration.GetValue<string>("Ing:AuthorizationEndpoint");
-                    options.TokenEndpoint = Configuration.GetValue<string>("Ing:TokenEndpoint");
+                    options.AuthorizationEndpoint = Configuration.GetValue<string>("BankProviders:Ing:AuthorizationEndpoint");
+                    options.TokenEndpoint = Configuration.GetValue<string>("BankProviders:Ing:TokenEndpoint");
                     options.CallbackPath = "/signin-ing";
-                    options.ClientId = Configuration.GetValue<string>("Ing:ClientId");
+                    options.ClientId = Configuration.GetValue<string>("BankProviders:Ing:ClientId");
                     options.ClientSecret = "fake";
                     options.Scope.Add("payment-accounts:balances:view");
                     options.Scope.Add("payment-accounts:transactions:view");
                     options.BackchannelHttpHandler = new IngHttpHandler(options.TokenEndpoint,
-                        Configuration.GetValue<string>("Ing:SingingCertificate"),
-                        Configuration.GetValue<string>("Ing:ClientCertificate"));
+                        Configuration.GetValue<string>("BankProviders:Ing:SingingCertificate"),
+                        Configuration.GetValue<string>("BankProviders:Ing:ClientCertificate"));
                     options.SaveTokens = true;
                     //options.Events.OnCreatingTicket = ctx =>
                     //{
