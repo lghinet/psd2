@@ -20,37 +20,27 @@ namespace psd2.web.Controllers
         private readonly IAuthenticationSchemeProvider _schemes;
         private readonly IAuthenticationHandlerProvider _handlerProvider;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IHttpClientFactory _clientFactory;
 
         public ProfileController(ILogger<HomeController> logger, IAuthenticationSchemeProvider schemes, 
-            IAuthenticationHandlerProvider handlerProvider, IAuthenticationService authenticationService)
+            IAuthenticationHandlerProvider handlerProvider, IAuthenticationService authenticationService, 
+            IHttpClientFactory clientFactory)
         {
             _logger = logger;
             _schemes = schemes;
             _handlerProvider = handlerProvider;
             _authenticationService = authenticationService;
+            _clientFactory = clientFactory;
         }
 
         public async Task<IActionResult> Index()
         {
-            var model = new LinkBankAccountModel();
-            var schemes = await _schemes.GetAllSchemesAsync();
-            model.ExternalLogins = schemes.Where(s => !string.IsNullOrEmpty(s.DisplayName)).ToList();
-
-            return View(model);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Ing()
-        {
-            //var ac = await HttpContext.GetUserAccessTokenAsync();
-            //using var client = new HttpClient(new DigestHttpHandler());
-            //client.DefaultRequestHeaders.Add("keyId", "5ca1ab1e-c0ca-c01a-cafe-154deadbea75");
+            using var client = _clientFactory.CreateClient("ING");
+            var ac = await HttpContext.GetUserAccessTokenAsync();
             //client.SetBearerToken(ac);
-            //var result = await client.GetStringAsync("https://api.sandbox.ing.com/v3/accounts");
-            //var accounts = JsonConvert.DeserializeObject<IngModel>(result);
-            //return View(accounts);
-
-            return null;
+            var result = await client.GetStringAsync("https://api.sandbox.ing.com/v3/accounts");
+            var accounts = JsonConvert.DeserializeObject<IngModel>(result);
+            return View(accounts);
         }
 
         [HttpPost]
@@ -91,13 +81,6 @@ namespace psd2.web.Controllers
             //var result = await client.GetStringAsync("https://api.apistorebt.ro/bt/sb/bt-psd2-aisp/v1/accounts");
             //var accounts = JsonConvert.DeserializeObject<IngModel>(result);
             //return View(accounts);
-        }
-
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
     }
 }

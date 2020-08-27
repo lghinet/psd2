@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace bt
 {
-    public class BtOptions : OAuthOptions
+    public class BtOAuthOptions : OAuthOptions
     {
-        public BtOptions()
+        public BtOAuthOptions()
         {
             AuthorizationEndpoint = "https://apistorebt.ro/mga/sps/oauth/oauth20/authorize";
             TokenEndpoint = "https://api.apistorebt.ro/bt/sb/oauth/token";

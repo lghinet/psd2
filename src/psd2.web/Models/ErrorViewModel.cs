@@ -5,7 +5,8 @@ namespace psd2.web.Models
     public class ErrorViewModel
     {
         public string RequestId { get; set; }
-
-        public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+        public string Type { get; set; }
+        public string Detail { get; set; }
+        public string Title { get; set; }
     }
 }

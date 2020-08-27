@@ -14,9 +14,9 @@ using System.Threading.Tasks;
 
 namespace ing
 {
-    public class IngOAuthHandler : OAuthHandler<OAuthOptions>
+    public class IngOAuthHandler : OAuthHandler<IngOAuthOptions>
     {
-        public IngOAuthHandler(IOptionsMonitor<OAuthOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+        public IngOAuthHandler(IOptionsMonitor<IngOAuthOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
             : base(options, logger, encoder, clock)
         {
         }
@@ -64,8 +64,7 @@ namespace ing
         protected override string BuildChallengeUrl(AuthenticationProperties properties, string redirectUri)
         {
             var authorizationEndpoint = $"{Options.AuthorizationEndpoint}?scope={FormatScope()}&redirect_uri={redirectUri}&country_code=RO";
-            var newChallengeUrl = RequestAuthorizationUrlAsync(Options.TokenEndpoint, FormatScope(), authorizationEndpoint)
-                .GetAwaiter().GetResult();
+            var newChallengeUrl = RequestAuthorizationUrlAsync(authorizationEndpoint).GetAwaiter().GetResult();
 
             var challengeUrl = base.BuildChallengeUrl(properties, redirectUri);
             var builder = new UriBuilder(newChallengeUrl) {Query = new Uri(challengeUrl).Query};
@@ -73,7 +72,7 @@ namespace ing
             return builder.Uri.ToString();
         }
 
-        private async Task<string> RequestAuthorizationUrlAsync(string tokenEndpoint, string scopes, string authorizationEndpoint)
+        private async Task<string> RequestAuthorizationUrlAsync(string authorizationEndpoint)
         {
             var response = await RequestAuthorizationUrlSignedAsync(authorizationEndpoint, Context.RequestAborted);
 

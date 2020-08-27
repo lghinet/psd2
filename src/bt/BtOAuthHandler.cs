@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace bt
 {
-    public class BtOAuthHandler : OAuthHandler<BtOptions>
+    public class BtOAuthHandler : OAuthHandler<BtOAuthOptions>
     {
-        public BtOAuthHandler(IOptionsMonitor<BtOptions> options, ILoggerFactory logger, 
+        public BtOAuthHandler(IOptionsMonitor<BtOAuthOptions> options, ILoggerFactory logger, 
             UrlEncoder encoder, ISystemClock clock)
             : base(options, logger, encoder, clock)
         {

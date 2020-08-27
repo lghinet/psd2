@@ -1,17 +1,15 @@
-﻿using System;
+﻿using IdentityModel;
+using IdentityModel.Client;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using IdentityModel;
-using IdentityModel.Client;
 
 namespace ing
 {
@@ -21,12 +19,13 @@ namespace ing
         private readonly X509Certificate2 _signingCertificate;
         private readonly X509Certificate2 _tlsCertificate;
 
-        public IngHttpHandler(string tokenEndpoint, string signingCert, string tlsCert) 
-            : base(DigestHttpHandler.Create(signingCert, tlsCert))
+        public IngHttpHandler(string tokenEndpoint, string signingCert, string tlsCert, HttpMessageHandler innerHandler)
+            : base(innerHandler)
         {
             _tokenEndpoint = tokenEndpoint;
             _signingCertificate = Utils.CreateCertificate(signingCert);
             _tlsCertificate = Utils.CreateCertificate(tlsCert);
+
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -86,14 +85,15 @@ namespace ing
     {
         private readonly X509Certificate2 _signingCertificate;
 
-        public DigestHttpHandler(X509Certificate2 signingCertificate, X509Certificate2 tlsCertificate) : base(Utils.GetSecuredHandler(tlsCertificate))
+        public DigestHttpHandler(X509Certificate2 signingCertificate)
         {
             _signingCertificate = signingCertificate;
         }
 
-        public static DigestHttpHandler Create(string signingCert, string tlsCert)
+        public DigestHttpHandler(X509Certificate2 signingCertificate, HttpMessageHandler innerHandler) 
+            : base(innerHandler)
         {
-            return new DigestHttpHandler(Utils.CreateCertificate(signingCert), Utils.CreateCertificate(tlsCert));
+            _signingCertificate = signingCertificate;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -123,7 +123,7 @@ namespace ing
         }
     }
 
-    static class Utils
+    public static class Utils
     {
         public static X509Certificate2 CreateCertificate(string fileName)
         {
@@ -158,6 +158,11 @@ namespace ing
             clientHandler.ClientCertificates.Add(tlsCertificate);
 
             return clientHandler;
+        }
+
+        public static HttpMessageHandler GetSecuredHandler(string tlsCertificate)
+        {
+            return GetSecuredHandler(CreateCertificate(tlsCertificate));
         }
     }
 }
